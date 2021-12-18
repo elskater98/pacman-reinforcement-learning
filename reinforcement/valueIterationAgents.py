@@ -196,7 +196,92 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
           and then act according to the resulting policy.
         """
         self.theta = theta
+        self.iterations = iterations
+        self.discount = discount
+        self.mdp = mdp
+
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
 
     def runValueIteration(self):
-        "*** YOUR CODE HERE ***"
+        # We get the states
+        states = self.mdp.getStates()
+        oldValues = self.values
+
+        # Initialize predecessors
+        predecessors = {}
+
+        # initialize with a set()
+        for state in states:
+            predecessors[state] = set()
+
+        # Create a priority queue
+        priorityQueue = util.PriorityQueue()
+
+        # iterate over states
+        for state in states:
+            # Get possible actions
+            actions = self.mdp.getPossibleActions(state)
+
+            # Initialize a new counter of qvalues
+            values = util.Counter()
+
+            # We will need also the value for the current state
+            currentValue = oldValues[state]
+
+            # Loop through all the actions
+            for action in actions:
+                # Get the transition and probs
+                trans = self.mdp.getTransitionStatesAndProbs(
+                    state, action)
+
+                # If the prob of reaching this state is not 0, we append those states to the predecessors
+                for nextState, prob in trans:
+                    if prob != 0.0:
+                        predecessors[nextState].add(state)
+
+                # Get the value for this action
+                values[action] = self.computeQValueFromValues(state, action)
+
+                # Calculate the diff as: current value - QMaxValue
+                diff = abs(currentValue - values[values.argMax()])
+
+                # Insert that state into the priority Queue
+                priorityQueue.update(state, -diff)
+
+        # Now we loop through all the interations
+        for i in range(self.iterations):
+
+            # Check if the priority queue is empty, if not, continue
+            if priorityQueue.isEmpty():
+                return
+
+            # Pop a state from the queue
+            state = priorityQueue.pop()
+
+            # If not a terminal state, we calculate the best QValue
+            if not self.mdp.isTerminal(state):
+                QValues = util.Counter()
+
+                for action in self.mdp.getPossibleActions(state):
+                    QValues[action] = self.computeQValueFromValues(
+                        state, action)
+
+                oldValues[state] = QValues[QValues.argMax()]
+
+            # We iterate over the predecessors of that state
+            for p in predecessors[state]:
+                QValues_p = util.Counter()
+                # Get the possible actions
+                actions = self.mdp.getPossibleActions(p)
+
+                # Loop through the actions to find the best action with the highest QValue
+                for action in actions:
+                    QValues_p[action] = self.computeQValueFromValues(p, action)
+
+                # We calculate the diff with the current value for this state and the best possible value
+                # ABS functions is for returning absolute values (non negative)
+                diff = abs(oldValues[p] - QValues_p[QValues_p.argMax()])
+
+                # If the differente is greater than theta, we update the priority of this state in the priority queue
+                if (diff > self.theta):
+                    priorityQueue.update(p, -diff)
