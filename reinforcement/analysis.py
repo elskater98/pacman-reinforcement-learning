@@ -20,44 +20,52 @@
 # value iteration.
 
 def question2():
-    answerDiscount = 0.9
-    answerNoise = 0.2
+    # python autograder.py -q q2
+    answerDiscount = 0.9  # If we set discount as 1, doesn't matter because a noisy movement of 0.2 affecting the pacman may never be able to cross the bridge.
+    answerNoise = 0.0  # If we change the noise we allow the pacman chose the action that wants
     return answerDiscount, answerNoise
 
+
+# python autograder.py -q q3
 def question3a():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.3
+    answerNoise = 0.0
+    answerLivingReward = 0.0
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
+
 
 def question3b():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.5
+    answerNoise = 0.2
+    answerLivingReward = -1.0
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
+
 
 def question3c():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.8
+    answerNoise = 0.0
+    answerLivingReward = 0.1
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
+
 
 def question3d():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.9
+    answerNoise = 0.5
+    answerLivingReward = 0.0
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
 
+
 def question3e():
-    answerDiscount = None
-    answerNoise = None
-    answerLivingReward = None
+    answerDiscount = 0.0
+    answerNoise = 0.0
+    answerLivingReward = -1.0
     return answerDiscount, answerNoise, answerLivingReward
     # If not possible, return 'NOT POSSIBLE'
+
 
 def question8():
     answerEpsilon = None
@@ -65,9 +73,11 @@ def question8():
     return answerEpsilon, answerLearningRate
     # If not possible, return 'NOT POSSIBLE'
 
+
 if __name__ == '__main__':
     print('Answers to analysis questions:')
     import analysis
+
     for q in [q for q in dir(analysis) if q.startswith('question')]:
         response = getattr(analysis, q)()
         print('  Question %s:\t%s' % (q, str(response)))
