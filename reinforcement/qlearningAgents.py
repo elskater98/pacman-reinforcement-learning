@@ -108,7 +108,7 @@ class QLearningAgent(ReinforcementAgent):
           HINT: You might want to use util.flipCoin(prob)
           HINT: To pick randomly from a list, use random.choice(list)
         """
-        # Pick Action
+        # python autograder.py -q q7
         legalActions = self.getLegalActions(state)
         action = None
 
