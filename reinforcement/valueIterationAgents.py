@@ -138,6 +138,7 @@ class ValueIterationAgent(ValueEstimationAgent):
 
 
 class AsynchronousValueIterationAgent(ValueIterationAgent):
+    # python autograder.py -q q4
     """
         * Please read learningAgents.py before reading this.*
 
@@ -164,9 +165,19 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
               mdp.isTerminal(state)
         """
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
+        self.mdp = mdp
+        self.discount = discount
+        self.iterations = iterations
+        self.values = util.Counter()
+        self.runValueIteration()
 
     def runValueIteration(self):
-        "*** YOUR CODE HERE ***"
+        states = self.mdp.getStates()
+        for i in range(self.iterations):
+            state = states[i % len(states)]
+            if not self.mdp.isTerminal(state):
+                self.values[state] = max(
+                    [self.getQValue(state, action) for action in self.mdp.getPossibleActions(state)])
 
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
