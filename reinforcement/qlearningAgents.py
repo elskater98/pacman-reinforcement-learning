@@ -68,7 +68,7 @@ class QLearningAgent(ReinforcementAgent):
         """
         legalActions = self.getLegalActions(state)
 
-        if len(legalActions) == 0:
+        if not legalActions:
             return 0.0
 
         tmp = util.Counter()
@@ -87,7 +87,7 @@ class QLearningAgent(ReinforcementAgent):
 
         legalActions = self.getLegalActions(state)
 
-        if len(legalActions) == 0:
+        if not legalActions:
             return None
 
         tmp = util.Counter()
@@ -112,7 +112,7 @@ class QLearningAgent(ReinforcementAgent):
         legalActions = self.getLegalActions(state)
         action = None
 
-        if len(legalActions) != 0:
+        if legalActions:
             if util.flipCoin(self.epsilon):
                 action = random.choice(legalActions)
             else:
@@ -196,18 +196,17 @@ class ApproximateQAgent(PacmanQAgent):
           where * is the dotProduct operator
         """
         features = self.featExtractor.getFeatures(state, action)
-        qVal = 0.0
+        q_value = 0.0
 
         for f in features:
-            qVal += features[f] * self.getWeights()[f]
+            q_value += features[f] * self.getWeights()[f]
 
-        return qVal
+        return q_value
 
     def update(self, state, action, nextState, reward):
         """
            Should update your weights based on transition
         """
-        qVal = 0.0
         difference = reward + (self.discount * self.getValue(nextState) - self.getQValue(state, action))
         features = self.featExtractor.getFeatures(state, action)
 

@@ -33,6 +33,7 @@ import collections
 
 
 class ValueIterationAgent(ValueEstimationAgent):
+    # python autograder.py -q q1
     """
         * Please read learningAgents.py before reading this.*
 
@@ -58,12 +59,10 @@ class ValueIterationAgent(ValueEstimationAgent):
         self.mdp = mdp
         self.discount = discount
         self.iterations = iterations
-        self.values = util.Counter()  # A Counter is a dict with default 0
+        self.values = util.Counter()  # A counter keeps track of counts for a set of keys. In particular, all keys are defaulted to have value 0.
         self.runValueIteration()
 
     def runValueIteration(self):
-        # python autograder.py -q q1
-
         # Calculate the best action for all states
         for i in range(self.iterations):
             updated_values = util.Counter()
@@ -181,6 +180,7 @@ class AsynchronousValueIterationAgent(ValueIterationAgent):
 
 
 class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
+    # python autograder.py -q q5
     """
         * Please read learningAgents.py before reading this.*
 
@@ -203,85 +203,57 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
         ValueIterationAgent.__init__(self, mdp, discount, iterations)
 
     def runValueIteration(self):
-        # We get the states
         states = self.mdp.getStates()
-        oldValues = self.values
-
-        # Initialize predecessors
+        old_values = self.values
         predecessors = {}
+        priority_queue = util.PriorityQueue()
 
-        # initialize with a set()
         for state in states:
-            predecessors[state] = set()
+            predecessors.update({state: set()})
 
-        # Create a priority queue
-        priorityQueue = util.PriorityQueue()
-
-        # iterate over states
         for state in states:
-            # Get possible actions
-            actions = self.mdp.getPossibleActions(state)
+            q_values = util.Counter()
+            current_value = old_values[state]
 
-            # Initialize a new counter of qvalues
-            values = util.Counter()
+            # Loop possible actions
+            for action in self.mdp.getPossibleActions(state):
 
-            # We will need also the value for the current state
-            currentValue = oldValues[state]
+                for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+                    predecessors[nextState].add(state)
 
-            # Loop through all the actions
-            for action in actions:
-                # Get the transition and probs
-                trans = self.mdp.getTransitionStatesAndProbs(
-                    state, action)
+                q_values[action] = self.computeQValueFromValues(state, action)
 
-                # If the prob of reaching this state is not 0, we append those states to the predecessors
-                for nextState, prob in trans:
-                    if prob != 0.0:
-                        predecessors[nextState].add(state)
+                # Calculate the difference between q_value and max q_value
+                diff = abs(current_value - q_values[q_values.argMax()])
 
-                # Get the value for this action
-                values[action] = self.computeQValueFromValues(state, action)
+                priority_queue.update(state, -diff)
 
-                # Calculate the diff as: current value - QMaxValue
-                diff = abs(currentValue - values[values.argMax()])
-
-                # Insert that state into the priority Queue
-                priorityQueue.update(state, -diff)
-
-        # Now we loop through all the interations
         for i in range(self.iterations):
 
-            # Check if the priority queue is empty, if not, continue
-            if priorityQueue.isEmpty():
-                return
+            # Check if the priority queue is empty
+            if priority_queue.isEmpty():
+                break
 
-            # Pop a state from the queue
-            state = priorityQueue.pop()
+            state = priority_queue.pop()
 
-            # If not a terminal state, we calculate the best QValue
+            # Calculate best q_value
             if not self.mdp.isTerminal(state):
-                QValues = util.Counter()
+                best_q_values = util.Counter()
 
                 for action in self.mdp.getPossibleActions(state):
-                    QValues[action] = self.computeQValueFromValues(
-                        state, action)
+                    best_q_values[action] = self.computeQValueFromValues(state, action)
 
-                oldValues[state] = QValues[QValues.argMax()]
+                old_values[state] = best_q_values[best_q_values.argMax()]
 
-            # We iterate over the predecessors of that state
             for p in predecessors[state]:
-                QValues_p = util.Counter()
-                # Get the possible actions
-                actions = self.mdp.getPossibleActions(p)
+                q_values_p = util.Counter()
 
-                # Loop through the actions to find the best action with the highest QValue
-                for action in actions:
-                    QValues_p[action] = self.computeQValueFromValues(p, action)
+                # Find the best action with the highest QValue
+                for action in self.mdp.getPossibleActions(p):
+                    q_values_p[action] = self.computeQValueFromValues(p, action)
 
-                # We calculate the diff with the current value for this state and the best possible value
-                # ABS functions is for returning absolute values (non negative)
-                diff = abs(oldValues[p] - QValues_p[QValues_p.argMax()])
+                diff = abs(old_values[p] - q_values_p[q_values_p.argMax()])
 
-                # If the differente is greater than theta, we update the priority of this state in the priority queue
-                if (diff > self.theta):
-                    priorityQueue.update(p, -diff)
+                # Update the priority of this state
+                if diff > self.theta:
+                    priority_queue.update(p, -diff)
