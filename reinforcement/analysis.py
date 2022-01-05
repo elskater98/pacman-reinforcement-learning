@@ -21,8 +21,8 @@
 
 def question2():
     # python autograder.py -q q2
-    answerDiscount = 0.9  # If we set discount as 1, doesn't matter because a noisy movement of 0.2 affecting the pacman may never be able to cross the bridge.
-    answerNoise = 0.0  # If we change the noise we allow the pacman chose the action that wants
+    answerDiscount = 0.9  # If we set discount as 1, it doesn't matter because a noisy movement of 0.2 affecting the pacman may never be able to cross the bridge.
+    answerNoise = 0.0  # If we change the noise we let the pacman chose the action that wants
     return answerDiscount, answerNoise
 
 

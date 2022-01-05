@@ -218,7 +218,7 @@ class PrioritizedSweepingValueIterationAgent(AsynchronousValueIterationAgent):
             # Loop possible actions
             for action in self.mdp.getPossibleActions(state):
 
-                for nextState, prob in self.mdp.getTransitionStatesAndProbs(state, action):
+                for nextState, _ in self.mdp.getTransitionStatesAndProbs(state, action):
                     predecessors[nextState].add(state)
 
                 q_values[action] = self.computeQValueFromValues(state, action)
